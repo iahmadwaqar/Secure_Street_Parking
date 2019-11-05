@@ -1,14 +1,17 @@
 package com.example.securestreetparking;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.StyleRes;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.nfc.Tag;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -16,23 +19,31 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.firebase.ui.auth.AuthUI;
+import com.google.firebase.database.ThrowOnExtraProperties;
+import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity {
 
+    private FirebaseDatabase database;
+    private DatabaseReference myRef;
     private FirebaseAuth mFirebaseAuth;
     private FirebaseAuth.AuthStateListener mAuthStateListener;
     Button monitoring;
 
     public static final int RC_SIGN_IN = 1;
 
-    boolean STATUS = true;
+    boolean STATUS;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,7 +52,10 @@ public class MainActivity extends AppCompatActivity {
 
         mFirebaseAuth = FirebaseAuth.getInstance();
 
+        database = FirebaseDatabase.getInstance();
+        myRef = database.getReference("message");
         monitorButton();
+
 
 
 
@@ -51,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
                     // User is signed in
-                    Toast.makeText(MainActivity.this, "Welcome to Secure Tech.", Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(MainActivity.this, "Welcome to Secure Tech.", Toast.LENGTH_SHORT).show();
                 } else {
                     // User is signed out
 
@@ -63,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
                             AuthUI.getInstance()
                                     .createSignInIntentBuilder()
                                     .setIsSmartLockEnabled(false)
-                                    .setTheme(R.style.AppTheme)
+                                    .setLogo(R.drawable.car1)
                                     .setAvailableProviders(providers)
                                     .build(),
                             RC_SIGN_IN);
@@ -75,19 +89,23 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+
+
+
+
+
+
+
     public void click(View view) {
-
+//        Toast.makeText(getApplicationContext(), "HELLO" + STATUS, Toast.LENGTH_SHORT).show();
         STATUS = !STATUS;
-
-        monitorButton();
-        Toast.makeText(getApplicationContext(), "HELLO" + STATUS, Toast.LENGTH_SHORT).show();
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference myRef = database.getReference("message");
         myRef.setValue(STATUS);
 
     }
 
+
     public void logOut(View view){
+        Toast.makeText(getApplicationContext(),"HELLO",Toast.LENGTH_SHORT).show();
         AuthUI.getInstance()
                 .signOut(this);
 
@@ -111,11 +129,33 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void monitorButton(){
+
+
         monitoring = findViewById(R.id.surveillance);
-        if(STATUS){
-            monitoring.setBackgroundColor(getResources().getColor(R.color.colorAccent));
-        }
-        else
-            monitoring.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+
+        myRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                String value = dataSnapshot.getValue().toString();
+                if(value == "true"){
+                    monitoring.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+                    STATUS = true;
+                }
+                else {
+                    monitoring.setBackgroundColor(getResources().getColor(R.color.colorAccent));
+                    STATUS = false;
+                } }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+//                Toast.makeText(getApplicationContext(),"Please Connect to Internet", Toast.LENGTH_LONG).show();
+
+            }
+        });
+    }
+
+    public void viewData(View view){
+        Intent intent = new Intent(this,DataActivity.class);
+        startActivity(intent);
     }
 }

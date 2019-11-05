@@ -6,6 +6,9 @@ public class DataClass {
     private String time;
     private String url;
 
+    public DataClass(){
+
+    }
     public DataClass(String date, String time, String url) {
         this.date = date;
         this.time = time;

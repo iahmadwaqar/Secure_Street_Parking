@@ -3,27 +3,24 @@ package com.example.securestreetparking;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ListView;
-import android.widget.Toast;
-
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class DataActivity extends AppCompatActivity {
 
-    DatabaseReference database=FirebaseDatabase.getInstance().getReference().child("data");
+    DatabaseReference database = FirebaseDatabase.getInstance().getReference().child("data");
 
     ListView listView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,17 +28,17 @@ public class DataActivity extends AppCompatActivity {
 
 
         final ArrayList<DataClass> data = new ArrayList<>();
-        final DataAdapter dataAdapter = new DataAdapter(this,0,data);
+        final DataAdapter dataAdapter = new DataAdapter(this, 0, data);
         listView = findViewById(R.id.listview);
         listView.setAdapter(dataAdapter);
-
 
         database.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                Toast.makeText(getApplicationContext(),"TOast",Toast.LENGTH_SHORT).show();
                 DataClass dataClass = dataSnapshot.getValue(DataClass.class);
-                dataAdapter.add(dataClass);
+                data.add(dataClass);
+                Collections.reverse(data);
+                dataAdapter.notifyDataSetChanged();
             }
 
             @Override
@@ -66,12 +63,17 @@ public class DataActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
+    }
 
-
-
-
-    public void homeScreen(View view){
-        Intent intent = new Intent(this,MainActivity.class);
+    public void homeScreen(View view) {
+        finish();
+        Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
     }
 }

@@ -5,14 +5,17 @@ public class DataClass {
     private String date;
     private String time;
     private String url;
+    private String threat="no";
 
-    public DataClass(){
+    public DataClass() {
 
     }
-    public DataClass(String date, String time, String url) {
+
+    public DataClass(String date, String time, String url, String threat) {
         this.date = date;
         this.time = time;
         this.url = url;
+        this.threat = threat;
     }
 
     public String getDate() {
@@ -33,6 +36,14 @@ public class DataClass {
 
     public String getUrl() {
         return url;
+    }
+
+    public String getThreat() {
+        return threat;
+    }
+
+    public void setThreat(String threat) {
+        this.threat = threat;
     }
 
     public void setUrl(String url) {

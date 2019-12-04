@@ -33,7 +33,6 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     public static final int RC_SIGN_IN = 1;
-    int singInCheck;
     String value;
     Button monitoring, viewData, logOut, retrieveImageButton;
     ImageView background, retrieveImageView;
@@ -116,6 +115,7 @@ public class MainActivity extends AppCompatActivity {
         if (!isNetworkAvailable()) {
             Toast.makeText(this, "Internet Connection is Required", Toast.LENGTH_SHORT).show();
             startActivity(new Intent(Settings.ACTION_WIRELESS_SETTINGS));
+            return;
         }
         STATUS = !STATUS;
         myRef.setValue(STATUS);
@@ -124,17 +124,31 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void logOut(View view) {
-
+        if (!isNetworkAvailable()) {
+            Toast.makeText(this, "Internet Connection is Required", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(Settings.ACTION_WIRELESS_SETTINGS));
+            return;
+        }
         AuthUI.getInstance()
                 .signOut(this);
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (listener != null)
+            retrieveImage.removeEventListener(listener);
+        if (mAuthStateListener != null)
+            mFirebaseAuth.removeAuthStateListener(mAuthStateListener);
+        if (statusListener != null)
+            cameraStatus.removeEventListener(statusListener);
     }
 
 
     @Override
     protected void onResume() {
         super.onResume();
-
         mFirebaseAuth.addAuthStateListener(mAuthStateListener);
     }
 
@@ -174,6 +188,7 @@ public class MainActivity extends AppCompatActivity {
                     Glide.with(getApplicationContext())
                             .load(R.drawable.camera_indicator)
                             .into(background);
+                    retrieveImageView.setImageResource(R.drawable.place_holder);
                     STATUS = true;
 
                 } else {
@@ -202,6 +217,7 @@ public class MainActivity extends AppCompatActivity {
         if (!isNetworkAvailable()) {
             Toast.makeText(this, "Internet Connection is Required", Toast.LENGTH_SHORT).show();
             startActivity(new Intent(Settings.ACTION_WIRELESS_SETTINGS));
+            return;
         }
         finish();
         Intent intent = new Intent(this, DataActivity.class);
@@ -213,6 +229,7 @@ public class MainActivity extends AppCompatActivity {
         if (!isNetworkAvailable()) {
             Toast.makeText(this, "Internet Connection is Required", Toast.LENGTH_SHORT).show();
             startActivity(new Intent(Settings.ACTION_WIRELESS_SETTINGS));
+            return;
         }
         if (value == "true")
             retrieveImage.setValue("True");

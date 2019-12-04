@@ -12,6 +12,8 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -20,7 +22,7 @@ public class DataActivity extends AppCompatActivity {
     DatabaseReference database = FirebaseDatabase.getInstance().getReference().child("data");
 
     ListView listView;
-
+    int count = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,13 +34,24 @@ public class DataActivity extends AppCompatActivity {
         listView = findViewById(R.id.listview);
         listView.setAdapter(dataAdapter);
 
-        database.addChildEventListener(new ChildEventListener() {
+        database.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                DataClass dataClass = dataSnapshot.getValue(DataClass.class);
-                data.add(dataClass);
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 Collections.reverse(data);
                 dataAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+        database.limitToLast(30).addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                count++;
+                DataClass dataClass = dataSnapshot.getValue(DataClass.class);
+                data.add(dataClass);
             }
 
             @Override
